@@ -1,6 +1,6 @@
 import React from "react";
 
-function Index() {
+function signin() {
   return (
     <div className="box">
       <h1 align="center">Login Form</h1>
@@ -20,4 +20,4 @@ function Index() {
   );
 }
 
-export default Index;
+export default signin;

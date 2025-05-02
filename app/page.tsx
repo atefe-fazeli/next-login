@@ -42,7 +42,7 @@ function Index() {
           <>
             {/* User not login */}
             <li>
-              <Link href="/signin">
+              <Link href="/auth/signin">
                 <span>
                   <FontAwesomeIcon icon={faSignIn} />
                 </span>
@@ -50,7 +50,7 @@ function Index() {
               </Link>
             </li>
             <li>
-              <Link href="/signup">
+              <Link href="/auth/signup">
                 <span>
                   <FontAwesomeIcon icon={faSignIn} />
                 </span>
