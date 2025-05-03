@@ -9,3 +9,5 @@ const ConnectToDB = async () => {
     console.log("err in db connection");
   }
 };
+
+export default ConnectToDB;
