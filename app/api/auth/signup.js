@@ -1,6 +1,6 @@
 import usersModel from "../../../models/users";
 import ConnectToDB from "../../../utils/db";
-
+import {hashPassword} from '../../../utils/auth'
 const handler = async (req, res) => {
   if (req.method !== "POST") {
     return false;
@@ -26,12 +26,13 @@ const handler = async (req, res) => {
     if (isUserExist) {
       return res.status(422).json({ message: "user already exist" });
     } else {
+      const hashedPassword = await hashPassword(password);
       const user = await usersModel.create({
         name,
         lastName,
         userName,
         email,
-        password,
+        hashedPassword,
         role: "USER",
       });
       return res
