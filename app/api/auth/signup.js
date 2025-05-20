@@ -1,48 +1,69 @@
-import usersModel from "../../../models/users";
-import ConnectToDB from "../../../utils/db";
-import {hashPassword} from '../../../utils/auth'
+import UserModel from "@/models/User";
+import connectToDB from "@/configs/db";
+import { generateToken, hashPassword } from "@/utils/auth";
+import { serialize } from "cookie";
+
 const handler = async (req, res) => {
   if (req.method !== "POST") {
     return false;
   }
 
   try {
-    ConnectToDB();
-    const { name, lastName, userName, email, password } = req.body;
+    connectToDB();
 
+    const { firstname, lastname, username, email, password } = req.body;
+
+    // Validation
     if (
-      !name.trim() ||
-      !lastName.trim() ||
-      !userName.trim() ||
+      !firstname.trim() ||
+      !lastname.trim() ||
+      !username.trim() ||
       !email.trim() ||
       !password.trim()
     ) {
       return res.status(422).json({ message: "Data is not valid !!" });
     }
 
-    const isUserExist = await usersModel.findOne({
-      $or: [{ userName }, { email }],
+    const isUserExist = await UserModel.findOne({
+      $or: [{ username }, { email }],
     });
+
     if (isUserExist) {
-      return res.status(422).json({ message: "user already exist" });
-    } else {
-      const hashedPassword = await hashPassword(password);
-      const user = await usersModel.create({
-        name,
-        lastName,
-        userName,
-        email,
-        hashedPassword,
-        role: "USER",
-      });
       return res
-        .status(201)
-        .json({ message: "user created Successfully", user });
+        .status(422)
+        .json({ message: "This username or email exist already !!" });
     }
-  } catch (error) {
+
+    const hashedPassword = await hashPassword(password);
+
+    const token = generateToken({ email });
+    const users = await UserModel.find();
+   
+    await UserModel.create({
+      firstname,
+      lastname,
+      username,
+      email,
+      password: hashedPassword,
+      role: users.length === 0 ? "ADMIN" : "USER",
+    });
+
+    return res
+      .setHeader(
+        "Set-Cookie",
+        serialize("token", token, {
+          httpOnly: true,
+          path: "/",
+          maxAge: 60 * 60 * 24,
+        })
+      )
+      .status(201)
+      .json({ message: "User Created Successfully :))" });
+  } catch (err) {
     return res
       .status(500)
       .json({ message: "UnKnown Internal Server Erorr !!" });
   }
 };
+
 export default handler;
